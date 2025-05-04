@@ -1,0 +1,3 @@
+@echo off
+echo Starting Next.js development server...
+powershell -ExecutionPolicy Bypass -Command "npm run dev" 

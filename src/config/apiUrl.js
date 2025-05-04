@@ -1,0 +1,1 @@
+export  const baseApiUrl ="https://e-portfolio-backend.vercel.app/"
