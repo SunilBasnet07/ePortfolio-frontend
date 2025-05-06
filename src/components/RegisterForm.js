@@ -1,29 +1,51 @@
 'use client'
 import Image from "next/image"
-import { Eye, EyeOff, Mail, Lock, User, Check } from "lucide-react"
+import { Eye, EyeOff, Mail, Lock, User, Check, Phone } from "lucide-react"
 import { useState } from "react"
 import { motion } from "framer-motion"
 import loginImage from "../Image/login.png"
 import { useForm } from "react-hook-form"
+import { signUp } from "@/api/auth"
+import { useRouter } from "next/navigation"
+import { HOME_ROUTE } from "@/routes"
+import toast from "react-hot-toast"
+import Spinner from "./spinner"
 
 export default function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false)
+  const [loading, setLoading] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const{register,handleSubmit,formState:{errors}}=useForm();
+  const { register, handleSubmit, formState: { errors } } = useForm();
+  const router = useRouter();
 
-  const submitForm=(data)=>{
-    console.log(data)
+  const submitForm = async (data) => {
+  
+    try {
+      setLoading(true)
+      const response = await signUp(data);
+      localStorage.setItem("authToken",response.token);
+      router.push(HOME_ROUTE);
+      toast.success("Register Successfull.", {
+        autoClose: 1500,
+      })
+    } catch (error) {
+      toast.error(error.response.data, {
+        autoClose: 1500,
+      })
+    }finally{
+      setLoading(false);
+    }
   }
 
   // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
-    visible: { 
+    visible: {
       opacity: 1,
-      transition: { 
+      transition: {
         when: "beforeChildren",
         staggerChildren: 0.1,
-        duration: 0.3 
+        duration: 0.3
       }
     }
   }
@@ -41,7 +63,7 @@ export default function RegisterForm() {
   return (
     <div className="flex min-h-screen bg-indigo-950">
       {/* Left side - Image */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, x: -50 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6 }}
@@ -54,14 +76,14 @@ export default function RegisterForm() {
           className="h-full w-full object-cover"
           priority
         />
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.8 }}
           className="absolute inset-0 z-20 flex items-center justify-center p-12 mb-10"
         >
           <div className="max-w-xl text-white">
-            <motion.h1 
+            <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5, duration: 0.5 }}
@@ -69,7 +91,7 @@ export default function RegisterForm() {
             >
               Join ePortfolio Today
             </motion.h1>
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.7, duration: 0.5 }}
@@ -82,7 +104,7 @@ export default function RegisterForm() {
       </motion.div>
 
       {/* Right side - Form */}
-      <motion.div 
+      <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -90,11 +112,11 @@ export default function RegisterForm() {
       >
         <div className="w-full max-w-md">
           {/* Logo */}
-          <motion.div 
+          <motion.div
             variants={itemVariants}
             className="mb-8 flex justify-center lg:justify-start"
           >
-            <motion.div 
+            <motion.div
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="flex h-12 w-12 items-center justify-center ml-40 rounded-full bg-purple-500/20"
@@ -105,7 +127,7 @@ export default function RegisterForm() {
             </motion.div>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             variants={itemVariants}
             className="mb-8 text-center lg:text-left"
           >
@@ -153,6 +175,28 @@ export default function RegisterForm() {
                   type="email"
                   placeholder="name@example.com"
                   {...register("email")}
+                  className="w-full rounded-lg border border-indigo-700 bg-indigo-900 py-3 pl-10 pr-4 font-Nunito text-white placeholder-indigo-400 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
+                />
+              </div>
+            </motion.div>
+
+            {/* number imput */}
+            <motion.div variants={formItemVariants}>
+              <label htmlFor="email" className="mb-2 block font-Nunito-SemiBold text-sm text-indigo-300">
+                Mobile Number
+              </label>
+              <div className="relative">
+                <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-indigo-400">
+                  <Phone className="h-5 w-5" />
+                </div>
+                <motion.input
+                  whileFocus={{ scale: 1.01 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                  id="number"
+                  name="number"
+                  type="number"
+                  placeholder="mobile number"
+                  {...register("number")}
                   className="w-full rounded-lg border border-indigo-700 bg-indigo-900 py-3 pl-10 pr-4 font-Nunito text-white placeholder-indigo-400 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
                 />
               </div>
@@ -243,11 +287,14 @@ export default function RegisterForm() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               type="submit"
-              className="w-full rounded-lg bg-purple-600 py-3 font-Nunito-Bold text-base font-medium text-white shadow-sm hover:bg-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-indigo-950"
+              disabled={loading}
+              className="w-full rounded-lg disabled:cursor-not-allowed flex justify-center items-center disabled:bg-gray-300 bg-purple-600 py-3 font-Nunito-Bold text-base font-medium text-white shadow-sm hover:bg-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-indigo-950"
             >
-              Create Account
+              {
+                loading ? (<Spinner size="20px" color="#ffffff" />) : ("Create Account")
+              }
             </motion.button>
-            
+
             <motion.div variants={formItemVariants} className="relative my-6">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-indigo-700"></div>
@@ -256,7 +303,7 @@ export default function RegisterForm() {
                 <span className="bg-indigo-950 px-4 font-Nunito text-indigo-400">Or continue with</span>
               </div>
             </motion.div>
-            
+
             {/* Google sign-up */}
             <motion.button
               variants={formItemVariants}
@@ -277,17 +324,17 @@ export default function RegisterForm() {
               </svg>
               Sign up with Google
             </motion.button>
-            
+
             {/* Sign in link */}
-            <motion.div 
+            <motion.div
               variants={formItemVariants}
               className="mt-6 text-center"
             >
               <p className="font-Nunito text-sm text-indigo-300">
                 Already have an account?{" "}
-                <motion.a 
+                <motion.a
                   whileHover={{ scale: 1.05, color: "#a855f7" }}
-                  href="/auth/login" 
+                  href="/auth/login"
                   className="font-Nunito-SemiBold text-purple-400 hover:text-purple-300"
                 >
                   Sign in instead

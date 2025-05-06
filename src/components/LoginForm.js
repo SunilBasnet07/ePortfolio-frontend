@@ -5,14 +5,36 @@ import { useState } from "react"
 import { motion } from "framer-motion"
 import loginImage from "../Image/login.png"
 import { useForm } from "react-hook-form"
+import { login } from "@/api/auth"
+import toast from 'react-hot-toast';
+import { useRouter } from "next/navigation"
+import { HOME_ROUTE } from "@/routes"
+import Spinner from "./spinner"
+
 
 export default function LoginForm() {
-  const [showPassword, setShowPassword] = useState(false)
-
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading,setLoading]=useState(false);
+  const router = useRouter();
   const { register, handleSubmit, formState: { errors } } = useForm();
 
-  const submitForm = (data) => {
-    console.log(data);
+  const submitForm = async (body) => {
+    try {
+      setLoading(true);
+      const response = await login(body);
+
+      localStorage.setItem("authToken", response.token);
+      toast.success('Login Successfull', {
+        autoClose: 1500,
+      })
+      router.push(HOME_ROUTE);
+    } catch (error) {
+      toast.error(error.response.data, {
+        autoClose: 1500,
+      });
+    } finally {
+      setLoading(false);
+    }
   }
 
   // Animation variants
@@ -189,7 +211,6 @@ export default function LoginForm() {
                 Remember me for 30 days
               </label>
             </motion.div>
-
             {/* Buttons */}
             <div className="space-y-4">
               <motion.button
@@ -197,9 +218,14 @@ export default function LoginForm() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 type="submit"
-                className="w-full rounded-lg bg-purple-600 py-3 font-Nunito-Bold text-base font-medium text-white shadow-sm hover:bg-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-indigo-950"
+                disabled={loading}
+                className="w-full rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed bg-purple-600 flex justify-center items-center py-3 font-Nunito-Bold text-base font-medium text-white shadow-sm hover:bg-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-indigo-950 disabled:opacity-70"
               >
-                Sign In
+                {loading ? (
+                  <Spinner size="20px" color="#ffffff" />
+                ) : (
+                  "Sign In"
+                )}
               </motion.button>
 
               <motion.div variants={formItemVariants} className="relative">
@@ -251,6 +277,7 @@ export default function LoginForm() {
           </form>
         </div>
       </motion.div>
+    
     </div>
   )
 }

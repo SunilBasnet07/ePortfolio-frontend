@@ -1,8 +1,11 @@
+
 import React from 'react'
 
 const AboutPage = () => {
   return (
-    <div>AboutPage</div>
+    <div className='mt-16'>AboutPage
+  
+    </div>
   )
 }
 

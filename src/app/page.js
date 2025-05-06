@@ -1,4 +1,5 @@
-import Navbar from "@/components/Navbar";
+
+import HomePortfolio from "@/components/HomePortfolio";
 import React from "react";
 
 
@@ -7,8 +8,8 @@ export default function Home() {
 
  
   return (
-<div>
-
+<div className="mt-10">
+<HomePortfolio/>
 
 </div>
   
