@@ -293,9 +293,7 @@ export default function RegisterForm() {
               disabled={loading}
               className="w-full rounded-lg disabled:cursor-not-allowed flex justify-center items-center disabled:bg-gray-300 bg-purple-600 py-3 font-Nunito-Bold text-base font-medium text-white shadow-sm hover:bg-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-indigo-950"
             >
-              {
-                loading ? (<Spinner size="20px" color="#ffffff" />) : ("Create Account")
-              }
+              {loading ? <Spinner size="sm" /> : "Create Account"}
             </motion.button>
 
             <motion.div variants={formItemVariants} className="relative my-6">

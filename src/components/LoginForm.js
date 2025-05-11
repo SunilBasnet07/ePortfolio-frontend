@@ -219,11 +219,7 @@ useEffect(() => {
                 disabled={loading}
                 className="w-full rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed bg-purple-600 flex justify-center items-center py-3 font-Nunito-Bold text-base font-medium text-white shadow-sm hover:bg-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-indigo-950 disabled:opacity-70"
               >
-                {loading ? (
-                  <Spinner size="20px" color="#ffffff" />
-                ) : (
-                  "Sign In"
-                )}
+                {loading ? <Spinner size="sm" /> : "Sign In"}
               </motion.button>
 
               <motion.div variants={formItemVariants} className="relative">

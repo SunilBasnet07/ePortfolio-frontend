@@ -28,7 +28,7 @@ const ProjectDetails = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-indigo-950 to-purple-900 flex items-center justify-center">
-        <Spinner size="50px" color="#ffffff" />
+        <Spinner size="lg" />
       </div>
     )
   }
