@@ -4,7 +4,6 @@ import { motion } from 'framer-motion'
 import Image from 'next/image'
 import projectImage from "../Image/team5.jpeg"
 import { Pencil, Trash2 } from 'lucide-react'
-import Modal from './Modal'
 import { PROJECT_ROUTE } from '@/routes'
 import Link from 'next/link'
 import { deleteProject } from '@/api/project'

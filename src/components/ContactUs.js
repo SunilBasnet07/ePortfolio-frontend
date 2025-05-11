@@ -4,7 +4,6 @@ import { motion } from 'framer-motion'
 import { useForm } from 'react-hook-form'
 import { contactMessage } from '@/api/project'
 import toast from 'react-hot-toast'
-import Spinner from '@/components/Spinner'
 import { useSelector } from 'react-redux'
 import LoadingSpinner from '@/components/LoadingSpinner'
 
