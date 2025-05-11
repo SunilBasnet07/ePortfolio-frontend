@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { getProjectById } from '@/api/project'
 import ProjectFullDetails from '@/components/ProjectDetails'
 import { useParams } from 'next/navigation'
-import Spinner from '@/components/Spinner'
+import LoadingSpinner from '@/components/LoadingSpinner'
 
 const ProjectDetails = () => {
   const [project, setProject] = useState(null)
@@ -28,7 +28,7 @@ const ProjectDetails = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-indigo-950 to-purple-900 flex items-center justify-center">
-        <Spinner size="lg" />
+        <LoadingSpinner size="lg" />
       </div>
     )
   }

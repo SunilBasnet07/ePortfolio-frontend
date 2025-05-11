@@ -7,6 +7,7 @@ import toast from 'react-hot-toast'
 import Spinner from '@/components/Spinner'
 import { PROJECT_ROUTE } from '@/routes'
 import { useRouter } from 'next/navigation'
+import LoadingSpinner from '@/components/LoadingSpinner'
 
 const ProjectForm = ({ isEditing = false, project }) => {
   const { register, handleSubmit, reset, setValue, watch } = useForm({
@@ -304,7 +305,7 @@ const ProjectForm = ({ isEditing = false, project }) => {
               disabled={loading}
               className="py-3 px-8 bg-gradient-to-r disabled:cursor-not-allowed disabled:bg-slate-200 flex justify-center items-center from-indigo-600 to-purple-600 text-white text-sm font-Nunito-Bold rounded-lg hover:opacity-90 transition-all shadow-lg shadow-purple-900/30"
             >
-              {loading ? <Spinner size="sm" /> : (isEditing ? 'Update Project' : 'Create Project')}
+              {loading ? <LoadingSpinner size="sm" /> : (isEditing ? 'Update Project' : 'Create Project')}
             </motion.button>
           </div>
         </form>

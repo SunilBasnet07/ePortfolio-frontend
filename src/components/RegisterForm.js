@@ -12,6 +12,7 @@ import toast from "react-hot-toast"
 import Spinner from '@/components/Spinner'
 import { useDispatch, useSelector } from "react-redux"
 import { userRegister } from "@/redux/auth/authAction"
+import LoadingSpinner from '@/components/LoadingSpinner'
 
 export default function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false)
@@ -293,7 +294,7 @@ export default function RegisterForm() {
               disabled={loading}
               className="w-full rounded-lg disabled:cursor-not-allowed flex justify-center items-center disabled:bg-gray-300 bg-purple-600 py-3 font-Nunito-Bold text-base font-medium text-white shadow-sm hover:bg-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-indigo-950"
             >
-              {loading ? <Spinner size="sm" /> : "Create Account"}
+              {loading ? <LoadingSpinner size="sm" /> : "Create Account"}
             </motion.button>
 
             <motion.div variants={formItemVariants} className="relative my-6">

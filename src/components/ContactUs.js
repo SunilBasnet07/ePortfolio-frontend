@@ -6,6 +6,7 @@ import { contactMessage } from '@/api/project'
 import toast from 'react-hot-toast'
 import Spinner from '@/components/Spinner'
 import { useSelector } from 'react-redux'
+import LoadingSpinner from '@/components/LoadingSpinner'
 
 const ContactUs = () => {
   const { register, handleSubmit ,reset} = useForm();
@@ -170,7 +171,7 @@ const ContactUs = () => {
                 disabled={loading}
                 className="px-8 py-3 rounded-lg bg-gradient-to-r flex justify-center items-center disabled:cursor-not-allowed disabled:bg-slate-200 from-indigo-600 to-purple-600 text-white font-Nunito-Bold hover:opacity-90 transition-all shadow-lg shadow-purple-900/30 w-full md:w-auto"
               >
-                {loading ? <Spinner size="sm" /> : "Send Message"}
+                {loading ? <LoadingSpinner size="sm" /> : "Send Message"}
               </motion.button>
             </form>
           </motion.div>
