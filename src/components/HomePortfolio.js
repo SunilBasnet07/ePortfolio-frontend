@@ -1,10 +1,47 @@
 'use client'
-import React from 'react'
-import { motion } from 'framer-motion'
+import React, { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import profileImage from "../Image/team5.jpeg"
+import Link from 'next/link'
+import { PROJECT_ROUTE } from '@/routes'
+import { useSelector } from 'react-redux'
+import { getProjectByUser } from '@/api/project'
 
 const HomePortfolio = () => {
+  const {user}=useSelector((state)=>state.auth)
+  const [greetingIndex, setGreetingIndex] = useState(0);
+  const greetings = [
+    "Hi, I'm",
+    "Welcome! I'm",
+    "Greetings, I'm"
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setGreetingIndex((prev) => (prev + 1) % greetings.length);
+    }, 3000); // Change greeting every 3 seconds
+
+    return () => clearInterval(interval);
+  }, []);
+  const [projects,setProject]=useState([]);
+
+
+  useEffect(() => {
+    getProjectByUser().then((response) => {
+      setProject(response);
+    
+    }).catch(error => {
+      console.log(error.message);
+    });
+
+  }, [])
+  const stats = [
+    { value: projects?.length  ||'+' , label: 'Projects Completed' },
+    { value: '12+', label: 'Years Experience' },
+    { value: '98%', label: 'Client Satisfaction' }
+  ]
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-indigo-950 to-purple-900 overflow-hidden">
       {/* Header section */}
@@ -54,8 +91,25 @@ const HomePortfolio = () => {
               className="mb-6"
             >
               <span className="inline-block py-1 px-3 rounded-full bg-indigo-500/20 text-indigo-300 text-sm font-Nunito-SemiBold mb-4">
-                Your Professional Portfolio
+                {user?.job || "Your Professional Portfolio"}
               </span>
+              
+              {/* Animated Greeting */}
+              <div className="mb-4">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={greetingIndex}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.5 }}
+                    className="text-3xl lg:text-4xl font-Poppins-Bold text-indigo-400"
+                  >
+                    {greetings[greetingIndex]} <span className="text-white">{user?.name  || "Developer"} </span>
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+
               <h1 className="text-5xl lg:text-7xl font-Poppins-Bold text-white leading-tight mb-6">
                 Design. <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-500">Create.</span> Inspire.
               </h1>
@@ -88,9 +142,9 @@ const HomePortfolio = () => {
               transition={{ delay: 0.7, duration: 0.5 }}
               className="flex flex-wrap gap-4"
             >
-              <button className="px-8 py-3 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-Nunito-Bold hover:opacity-90 transition-all shadow-lg shadow-purple-900/30">
+              <Link href={PROJECT_ROUTE} className="px-8 py-3 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-Nunito-Bold hover:opacity-90 transition-all shadow-lg shadow-purple-900/30">
                 Explore Projects
-              </button>
+              </Link>
               <button className="px-8 py-3 rounded-lg border border-indigo-500/30 hover:bg-indigo-900/30 text-indigo-300 font-Nunito transition-all">
                 View Resume
               </button>
@@ -109,8 +163,9 @@ const HomePortfolio = () => {
               <div className="relative z-10 overflow-hidden w-[300px] h-[400px] lg:w-[380px] lg:h-[500px] rounded-2xl shadow-2xl shadow-purple-900/30">
                 <div className="absolute inset-0 bg-gradient-to-b from-indigo-600/20 to-purple-900/40 mix-blend-overlay z-10"></div>
                 <Image 
-                  src={profileImage} 
+                  src={user?.profileImageUrl || profileImage} 
                   alt="Profile" 
+                  fill
                   className="w-full h-full object-cover"
                   placeholder="blur"
                   blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mN88P//fwAJZwPXzMuO4wAAAABJRU5ErkJggg=="
@@ -131,7 +186,7 @@ const HomePortfolio = () => {
                   <div className="w-2 h-2 rounded-full bg-green-500"></div>
                   <p className="text-green-500 text-xs font-Nunito-SemiBold">Available for work</p>
                 </div>
-                <p className="text-white text-sm font-Nunito-SemiBold">Digital Designer & Developer</p>
+                <p className="text-white text-sm font-Nunito-SemiBold">{user?.job || "Degital Designer & Developer"}</p>
               </motion.div>
               
               <motion.div 
@@ -148,7 +203,7 @@ const HomePortfolio = () => {
             </div>
             
             {/* Skill tags */}
-            <motion.div 
+            {/* <motion.div 
               className="absolute -right-4 top-1/2 transform -translate-y-1/2 space-y-3"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -162,7 +217,7 @@ const HomePortfolio = () => {
                   {skill}
                 </div>
               ))}
-            </motion.div>
+            </motion.div> */}
           </motion.div>
         </div>
       </div>
@@ -171,10 +226,10 @@ const HomePortfolio = () => {
 }
 
 // Stats data
-const stats = [
-  { value: '60+', label: 'Projects Completed' },
-  { value: '12+', label: 'Years Experience' },
-  { value: '98%', label: 'Client Satisfaction' }
-]
+// const stats = [
+//   { value: '60+', label: 'Projects Completed' },
+//   { value: '12+', label: 'Years Experience' },
+//   { value: '98%', label: 'Client Satisfaction' }
+// ]
 
 export default HomePortfolio 

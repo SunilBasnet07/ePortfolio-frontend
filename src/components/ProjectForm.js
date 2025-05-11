@@ -1,23 +1,74 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useForm } from 'react-hook-form'
-import { createProject } from '@/api/project'
+import { createProject, updateProject } from '@/api/project'
 import toast from 'react-hot-toast'
 import Spinner from './spinner'
+import { PROJECT_ROUTE } from '@/routes'
+import { useRouter } from 'next/navigation'
 
-const ProjectForm = ({ project, isEditing = false }) => {
-  // Default empty project structure if none provided
-
-  const { register, handleSubmit ,reset} = useForm();
+const ProjectForm = ({ isEditing = false, project }) => {
+  const { register, handleSubmit, reset, setValue, watch } = useForm({
+    values: project,
+  });
   const [fileName, setFileName] = useState(null);
-  const[loading,setLoading]= useState(false);
+  const [filePreview, setFilePreview] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [techInput, setTechInput] = useState('');
+  const router = useRouter();
 
+  // Watch the techStack field for changes
+  const techStack = watch('techStack') || [];
+
+  // Initialize techStack from project data if editing
+  useEffect(() => {
+    if (isEditing && project?.techStack) {
+      try {
+        // Handle both string and array formats
+        const techArray = typeof project.techStack === 'string' 
+          ? JSON.parse(project.techStack)
+          : project.techStack;
+        setValue('techStack', techArray);
+      } catch (error) {
+        console.error('Error parsing techStack:', error);
+        setValue('techStack', []);
+      }
+    }
+  }, [isEditing, project, setValue]);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setFileName(file);
+      const previewUrl = URL.createObjectURL(file);
+      setFilePreview(previewUrl);
+    }
+  };
+
+  const handleTechStackChange = (e) => {
+    setTechInput(e.target.value);
+  };
+
+  const addTech = (e) => {
+    e.preventDefault();
+    if (techInput.trim() && !techStack.includes(techInput.trim())) {
+      const newTechStack = [...techStack, techInput.trim()];
+      setValue('techStack', newTechStack);
+      setTechInput('');
+    }
+  };
+
+  const removeTech = (techToRemove) => {
+    const newTechStack = techStack.filter(tech => tech !== techToRemove);
+    setValue('techStack', newTechStack);
+  };
 
   async function submitForm(data) {
     const formData = new FormData();
     formData.append("title", data?.title)
     formData.append("description", data?.description)
+    // Send techStack as a regular array, not stringified
     formData.append("techStack", data?.techStack)
     formData.append("githubUrl", data?.githubUrl)
     formData.append("liveUrl", data?.liveUrl)
@@ -25,31 +76,22 @@ const ProjectForm = ({ project, isEditing = false }) => {
       formData.append("image", fileName);
     }
 
-
     try {
-    setLoading(true)
-      const response = await createProject(formData);
-
-      toast.success("Project added successfull.");
+      setLoading(true)
+      isEditing ? (await updateProject(project._id, formData)) : (await createProject(formData));
+      toast.success(isEditing ? "Project updated successfully." : "Project added successfully.");
+      if (isEditing) {
+        router.push(PROJECT_ROUTE)
+      }
     } catch (error) {
       toast.error(error?.response?.data);
-     
-    }finally{
+    } finally {
       setLoading(false)
       reset();
+      setFileName(null);
+      setFilePreview(null);
     }
   }
-  // const defaultProject = {
-  //   title: '',
-  //   description: '',
-  //   techStack: [],
-  //   imageUrl: '',
-  //   githubUrl: '',
-  //   liveUrl: ''
-  // }
-
-  // Use provided project or default empty one
-  // const projectData = project || defaultProject
 
   return (
     <div className="bg-gray-900/60 backdrop-blur-sm border border-indigo-500/20 rounded-2xl overflow-hidden shadow-xl p-8">
@@ -69,7 +111,7 @@ const ProjectForm = ({ project, isEditing = false }) => {
           </p>
         </div>
 
-        <form className="space-y-6" onSubmit={handleSubmit(submitForm)}>
+        <form onSubmit={handleSubmit(submitForm)} className="space-y-6">
           {/* Project Title */}
           <div>
             <label htmlFor="title" className="block text-indigo-300 font-Nunito-SemiBold mb-2 text-sm">
@@ -83,7 +125,6 @@ const ProjectForm = ({ project, isEditing = false }) => {
               {...register("title")}
               className="w-full bg-gray-800/50 border border-indigo-500/20 rounded-lg px-4 py-3 text-white focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-all font-Nunito"
               placeholder="Portfolio Website"
-            // defaultValue={projectData.title}
             />
           </div>
 
@@ -100,67 +141,74 @@ const ProjectForm = ({ project, isEditing = false }) => {
               {...register("description")}
               className="w-full bg-gray-800/50 border border-indigo-500/20 rounded-lg px-4 py-3 text-white focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-all font-Nunito resize-none"
               placeholder="A brief description of your project and what technologies you used..."
-            // defaultValue={projectData.description}
-            ></motion.textarea>
+            />
           </div>
 
-          {/* Tech Stack Tags */}
+          {/* Tech Stack */}
           <div>
-            <label htmlFor="techStack" className="block text-indigo-300 font-Nunito-SemiBold mb-2 text-sm">
+            <label className="block text-indigo-300 font-Nunito-SemiBold mb-2 text-sm">
               Tech Stack <span className="text-red-400">*</span>
             </label>
-            <motion.input
-              whileFocus={{ scale: 1.01 }}
-              transition={{ type: "spring", stiffness: 300, damping: 10 }}
-              type="text"
-              id="techStack"
-              {...register("techStack")}
-              className="w-full bg-gray-800/50 border border-indigo-500/20 rounded-lg px-4 py-3 text-white focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-all font-Nunito"
-              placeholder="React, Node.js, MongoDB (comma separated)"
-            // defaultValue={projectData.techStack.join(', ')}
-            />
-
-            {/* Tech Preview */}
-            <div className="flex flex-wrap gap-2 mt-3">
-              {['React', 'Next.js', 'Tailwind CSS'].map((tech, index) => (
-                <span
-                  key={index}
-                  className="text-xs font-Nunito-SemiBold px-2 py-1 bg-indigo-900/80 text-indigo-300 rounded-full"
+            <div className="space-y-3">
+              <div className="flex gap-2">
+                <motion.input
+                  whileFocus={{ scale: 1.01 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 10 }}
+                  type="text"
+                  value={techInput}
+                  onChange={handleTechStackChange}
+                  onKeyPress={(e) => e.key === 'Enter' && addTech(e)}
+                  className="flex-1 bg-gray-800/50 border border-indigo-500/20 rounded-lg px-4 py-3 text-white focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-all font-Nunito"
+                  placeholder="Add a technology (e.g., React)"
+                />
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={addTech}
+                  type="button"
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
                 >
-                  {tech}
-                </span>
-              ))}
+                  Add
+                </motion.button>
+              </div>
+
+              {/* Tech Stack Tags */}
+              <div className="flex flex-wrap gap-2">
+                {techStack.map((tech, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="group relative bg-indigo-900/80 text-indigo-300 rounded-full px-3 py-1 text-sm font-Nunito-SemiBold flex items-center gap-1"
+                  >
+                    {tech}
+                    <button
+                      type="button"
+                      onClick={() => removeTech(tech)}
+                      className="text-indigo-400 hover:text-red-400 transition-colors"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </motion.div>
+                ))}
+              </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Image URL */}
-            <div>
-              <label htmlFor="imageUrl" className="block text-indigo-300 font-Nunito-SemiBold mb-2 text-sm">
-                Image URL
-              </label>
-              <motion.input
-                whileFocus={{ scale: 1.01 }}
-                transition={{ type: "spring", stiffness: 300, damping: 10 }}
-                type="text"
-                id="imageUrl"
-                // {...register("imageUrl")}
-                className="w-full bg-gray-800/50 border border-indigo-500/20 rounded-lg px-4 py-3 text-white focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-all font-Nunito"
-                placeholder="https://example.com/image.jpg"
-              // defaultValue={projectData.imageUrl}
-              />
-            </div>
-
-            {/* File Upload Alternative */}
-            <div className="w-full">
+          {/* File Upload */}
+          <div>
+            <label className="block text-indigo-300 font-Nunito-SemiBold mb-2 text-sm">
+              Project Image
+            </label>
+            <div className="space-y-4">
               <label className="w-full bg-gray-800/50 border border-dashed border-indigo-500/40 rounded-lg px-4 py-3 text-white transition-all font-Nunito flex items-center justify-center cursor-pointer hover:bg-indigo-900/20">
                 <input
                   type="file"
                   className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files[0];
-                    setFileName(file);
-                  }}
+                  accept="image/*"
+                  onChange={handleFileChange}
                 />
                 <svg
                   className="w-5 h-5 text-indigo-400 mr-2"
@@ -176,54 +224,74 @@ const ProjectForm = ({ project, isEditing = false }) => {
                   />
                 </svg>
                 <span className="text-indigo-300 text-sm">
-                  Choose file or drag & drop
+                  {fileName ? fileName.name : 'Choose file or drag & drop'}
                 </span>
               </label>
+
+              {/* File Preview */}
+              {filePreview && (
+                <div className="relative w-full h-48 rounded-lg overflow-hidden">
+                  <img
+                    src={filePreview}
+                    alt="Preview"
+                    className="w-full h-full object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFileName(null);
+                      setFilePreview(null);
+                    }}
+                    className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Github URL */}
-            <div>
-              <label htmlFor="githubUrl" className="block text-indigo-300 font-Nunito-SemiBold mb-2 text-sm">
-                GitHub URL
-              </label>
-              <motion.input
-                whileFocus={{ scale: 1.01 }}
-                transition={{ type: "spring", stiffness: 300, damping: 10 }}
-                type="text"
-                id="githubUrl"
-                {...register("githubUrl")}
-                className="w-full bg-gray-800/50 border border-indigo-500/20 rounded-lg px-4 py-3 text-white focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-all font-Nunito"
-                placeholder="https://github.com/yourusername/project"
-              // defaultValue={projectData.githubUrl}
-              />
-            </div>
+          {/* Github URL */}
+          <div>
+            <label htmlFor="githubUrl" className="block text-indigo-300 font-Nunito-SemiBold mb-2 text-sm">
+              GitHub URL
+            </label>
+            <motion.input
+              whileFocus={{ scale: 1.01 }}
+              transition={{ type: "spring", stiffness: 300, damping: 10 }}
+              type="text"
+              id="githubUrl"
+              {...register("githubUrl")}
+              className="w-full bg-gray-800/50 border border-indigo-500/20 rounded-lg px-4 py-3 text-white focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-all font-Nunito"
+              placeholder="https://github.com/yourusername/project"
+            />
+          </div>
 
-            {/* Live URL */}
-            <div>
-              <label htmlFor="liveUrl" className="block text-indigo-300 font-Nunito-SemiBold mb-2 text-sm">
-                Live Demo URL
-              </label>
-              <motion.input
-                whileFocus={{ scale: 1.01 }}
-                transition={{ type: "spring", stiffness: 300, damping: 10 }}
-                type="text"
-                id="liveUrl"
-                {...register("liveUrl")}
-                className="w-full bg-gray-800/50 border border-indigo-500/20 rounded-lg px-4 py-3 text-white focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-all font-Nunito"
-                placeholder="https://your-project-demo.com"
-              // defaultValue={projectData.liveUrl}
-              />
-            </div>
+          {/* Live URL */}
+          <div>
+            <label htmlFor="liveUrl" className="block text-indigo-300 font-Nunito-SemiBold mb-2 text-sm">
+              Live Demo URL
+            </label>
+            <motion.input
+              whileFocus={{ scale: 1.01 }}
+              transition={{ type: "spring", stiffness: 300, damping: 10 }}
+              type="text"
+              id="liveUrl"
+              {...register("liveUrl")}
+              className="w-full bg-gray-800/50 border border-indigo-500/20 rounded-lg px-4 py-3 text-white focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-all font-Nunito"
+              placeholder="https://your-project-demo.com"
+            />
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-wrap justify-end gap-4 pt-4">
+          <div className="flex justify-end space-x-4">
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               type="button"
+              onClick={() => router.push(PROJECT_ROUTE)}
               className="py-3 px-6 border border-indigo-500/30 text-indigo-300 text-sm font-Nunito rounded-lg hover:bg-indigo-900/30 transition-all"
             >
               Cancel
@@ -236,7 +304,7 @@ const ProjectForm = ({ project, isEditing = false }) => {
               disabled={loading}
               className="py-3 px-8 bg-gradient-to-r disabled:cursor-not-allowed disabled:bg-slate-200 flex justify-center items-center from-indigo-600 to-purple-600 text-white text-sm font-Nunito-Bold rounded-lg hover:opacity-90 transition-all shadow-lg shadow-purple-900/30"
             >
-              { loading?(<Spinner size="25px" color="#ffffff" />)  : (isEditing ? 'Update Project' : 'Create Project')}
+              {loading ? (<Spinner size="25px" color="#ffffff" />) : (isEditing ? 'Update Project' : 'Create Project')}
             </motion.button>
           </div>
         </form>

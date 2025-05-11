@@ -1,41 +1,39 @@
 'use client'
 import Image from "next/image"
 import { Eye, EyeOff, Mail, Lock } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import loginImage from "../Image/login.png"
 import { useForm } from "react-hook-form"
-import { login } from "@/api/auth"
 import toast from 'react-hot-toast';
 import { useRouter } from "next/navigation"
-import { HOME_ROUTE } from "@/routes"
+import { FORGOT_PASSWORD_ROUTE, HOME_ROUTE } from "@/routes"
 import Spinner from "./spinner"
+import { useDispatch, useSelector } from "react-redux"
+import { userLogin } from "@/redux/auth/authAction"
 
 
 export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
-  const [loading,setLoading]=useState(false);
+
   const router = useRouter();
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const dispatch = useDispatch();
+  const { user,error, loading } = useSelector((state) => state.auth)
+  const { register, handleSubmit } = useForm();
 
   const submitForm = async (body) => {
-    try {
-      setLoading(true);
-      const response = await login(body);
-
-      localStorage.setItem("authToken", response.token);
-      toast.success('Login Successfull', {
-        autoClose: 1500,
-      })
-      router.push(HOME_ROUTE);
-    } catch (error) {
-      toast.error(error.response.data, {
-        autoClose: 1500,
-      });
-    } finally {
-      setLoading(false);
-    }
+    dispatch(userLogin(body));
+}
+useEffect(() => {
+  if (user) {
+    toast.success("Login successful");
+    router.push(HOME_ROUTE);
   }
+  if (error) {
+    toast.error(error || "Login failed");
+  }
+}, [user, error]);
+
 
   // Animation variants
   const containerVariants = {
@@ -119,7 +117,7 @@ export default function LoginForm() {
             <motion.div
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="flex h-12 w-12 items-center justify-center ml-40 rounded-full bg-purple-500/20"
+              className="flex h-12 w-12 items-center justify-center lg:ml-40 rounded-full bg-purple-500/20"
             >
               <svg viewBox="0 0 24 24" className="h-8 w-8 text-purple-400" fill="currentColor">
                 <path d="M12,0 L14.59,8.41 L23,12 L14.59,15.59 L12,24 L9.41,15.59 L1,12 L9.41,8.41 Z" />
@@ -167,7 +165,7 @@ export default function LoginForm() {
                 <motion.a
                   whileHover={{ scale: 1.05, color: "#a855f7" }}
                   whileTap={{ scale: 0.95 }}
-                  href="#"
+                  href={FORGOT_PASSWORD_ROUTE}
                   className="text-xs font-medium text-purple-400 hover:text-purple-300"
                 >
                   Forgot Password?
@@ -277,7 +275,7 @@ export default function LoginForm() {
           </form>
         </div>
       </motion.div>
-    
+
     </div>
   )
 }

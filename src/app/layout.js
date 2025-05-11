@@ -1,8 +1,5 @@
-
-
-import Navbar from "@/components/Navbar";
 import "./globals.css";
-import { Toaster } from "react-hot-toast";
+import MainLayout from "@/layout/MainLayout";
 
 export const metadata = {
   title: "Create Next App",
@@ -13,9 +10,10 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className="light">
       <body>
-        <Navbar/>
-        {children}
-        <Toaster />
+     <MainLayout>
+      {children}
+     </MainLayout>
+      
       </body>
     </html>
   );

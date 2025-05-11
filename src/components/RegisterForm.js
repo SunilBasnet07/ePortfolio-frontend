@@ -1,41 +1,44 @@
 'use client'
 import Image from "next/image"
 import { Eye, EyeOff, Mail, Lock, User, Check, Phone } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import loginImage from "../Image/login.png"
 import { useForm } from "react-hook-form"
-import { signUp } from "@/api/auth"
+
 import { useRouter } from "next/navigation"
 import { HOME_ROUTE } from "@/routes"
 import toast from "react-hot-toast"
 import Spinner from "./spinner"
+import { useDispatch, useSelector } from "react-redux"
+import { userRegister } from "@/redux/auth/authAction"
 
 export default function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false)
-  const [loading, setLoading] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const { register, handleSubmit } = useForm();
   const router = useRouter();
+  const {user,loading,error}=useSelector((state)=>state.auth)
+  const dispatch = useDispatch();
+  const submitForm = async(data) => {
+     dispatch(userRegister(data))
 
-  const submitForm = async (data) => {
   
-    try {
-      setLoading(true)
-      const response = await signUp(data);
-      localStorage.setItem("authToken",response.token);
-      router.push(HOME_ROUTE);
-      toast.success("Register Successfull.", {
-        autoClose: 1500,
-      })
-    } catch (error) {
-      toast.error(error.response.data, {
-        autoClose: 1500,
-      })
-    }finally{
-      setLoading(false);
-    }
   }
+  useEffect(()=>{
+    if(user){
+      toast.success("Register Successfully.",{
+        autoClose:1500,
+        
+      })
+      router.push(HOME_ROUTE);
+    }
+    if(error){
+      toast.error(error,{
+        autoClose:1500,
+      })
+    }
+  },[user,error])
 
   // Animation variants
   const containerVariants = {
@@ -114,12 +117,12 @@ export default function RegisterForm() {
           {/* Logo */}
           <motion.div
             variants={itemVariants}
-            className="mb-8 flex justify-center lg:justify-start"
+            className="mb-8 flex justify-center  lg:justify-start"
           >
             <motion.div
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="flex h-12 w-12 items-center justify-center ml-40 rounded-full bg-purple-500/20"
+              className="flex h-12 w-12 items-center  justify-center lg:ml-40 rounded-full bg-purple-500/20"
             >
               <svg viewBox="0 0 24 24" className="h-8 w-8 text-purple-400" fill="currentColor">
                 <path d="M12,0 L14.59,8.41 L23,12 L14.59,15.59 L12,24 L9.41,15.59 L1,12 L9.41,8.41 Z" />

@@ -1,2 +1,1 @@
-export  const baseApiUrl ="https://e-portfolio-backend.vercel.app"
-// export  const baseApiUrl ="http://localhost:5000"
+export  const baseApiUrl =process.env.NEXT_PUBLIC_APP_URL

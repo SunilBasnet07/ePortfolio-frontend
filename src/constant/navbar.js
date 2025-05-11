@@ -17,14 +17,14 @@ const navLinks=[
         label:"Contact",
         route:CONTACT_ROUTE,
     },
-    {
-        label:"Login",
-        route:LOGIN_ROUTE,
-    },
-    {
-        label:"Register",
-        route:REGISTER_ROUTE,
-    },
+    // {
+    //     label:"Login",
+    //     route:LOGIN_ROUTE,
+    // },
+    // {
+    //     label:"Register",
+    //     route:REGISTER_ROUTE,
+    // },
 ]
 
 export default navLinks;

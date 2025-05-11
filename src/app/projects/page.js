@@ -4,21 +4,27 @@ import React, { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import {  getProjectByUser } from '@/api/project'
+import { useSelector } from 'react-redux'
+
+import { LOGIN_ROUTE } from '@/routes'
+import { useRouter } from 'next/navigation'
 
 
 
 
 const ProjectsPage = () => {
-
-
+const {user}=useSelector((state)=>state.auth)
+const router = useRouter();
 
 const [getData,setGetData]=useState([]);
+
 
   useEffect(() => {
     getProjectByUser().then((response) => {
       setGetData(response);
+    
     }).catch(error => {
-      console.log(error.response.data);
+      console.log(error.message);
     });
 
   }, [])
@@ -80,9 +86,9 @@ const [getData,setGetData]=useState([]);
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <Link href="/projects/add">
+            <Link href={user?("/projects/add"): LOGIN_ROUTE}>
               <motion.button
-                whileHover={{ scale: 1.05, boxShadow: "0 5px 15px rgba(124, 58, 237, 0.3)" }}
+            whileHover={{ scale: 1.05, boxShadow: "0 5px 15px rgba(124, 58, 237, 0.3)" }}
                 whileTap={{ scale: 0.95 }}
                 className="flex items-center space-x-2 py-3 px-6 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-Nunito-Bold rounded-lg shadow-lg shadow-purple-900/30 hover:opacity-90 transition-all"
               >
@@ -103,7 +109,7 @@ const [getData,setGetData]=useState([]);
           transition={{ duration: 0.5, delay: 0.2 }}
         >
           {getData.map((project, index) => (
-            <ProjectCard key={project._id} project={project} />
+            <ProjectCard key={project._id} project={project}  />
           ))}
         </motion.div>
       </div>

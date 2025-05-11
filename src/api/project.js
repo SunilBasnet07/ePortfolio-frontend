@@ -14,13 +14,24 @@ const getProjectByUser = async () => {
 }
 
 const getProjectById = async (id) => {
-    console.log(id);
+
     const response = await axios.get(`${baseApiUrl}/api/project/${id}`)
     return response.data
 }
 const deleteProject = async (id) => {
   
     const response = await axios.delete(`${baseApiUrl}/api/project/${id}`, {
+        headers: {
+            Authorization: `Bearer ${authToken}`
+            
+        }
+
+    })
+    return response.data
+}
+const updateProject = async (id,data) => {
+  console.log(id,data)
+    const response = await axios.put(`${baseApiUrl}/api/project/${id}`,data, {
         headers: {
             Authorization: `Bearer ${authToken}`
             
@@ -46,4 +57,4 @@ const contactMessage = async(data)=>{
  const response = await axios.post(`${baseApiUrl}/api/contact`,data)
  return response.data;
 }
-export { getProjectByUser ,createProject,contactMessage,getProjectById,deleteProject }
+export { getProjectByUser ,createProject,contactMessage,getProjectById,deleteProject,updateProject}

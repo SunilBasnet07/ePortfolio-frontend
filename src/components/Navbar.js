@@ -2,15 +2,38 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import navLinks from '@/constant/navbar';
+import Image from 'next/image';
+import { ChevronDown, LogOut, User, Settings } from 'lucide-react';
+import profileImage from "../Image/placeholderImage.png"
+import toast from 'react-hot-toast';
+import { useDispatch, useSelector } from 'react-redux';
+import { logout } from '@/redux/auth/authSlice';
+import { LOGIN_ROUTE } from '@/routes';
 
 const Navbar = () => {
     const pathname = usePathname();
+    const router = useRouter();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const dispatch = useDispatch();
+    const { user } = useSelector((state) => state.auth);
+    function handleLogout() {
+        dispatch(logout())
+        toast.success("Logout Successfully", {
+            authClose: 1500,
+        })
+        setIsProfileOpen(false)
+        router.push(LOGIN_ROUTE)
+    }
 
     const toggleMenu = () => {
         setIsMenuOpen(!isMenuOpen);
+    };
+
+    const toggleProfile = () => {
+        setIsProfileOpen(!isProfileOpen);
     };
 
     return (
@@ -28,7 +51,7 @@ const Navbar = () => {
                     </div>
 
                     {/* Desktop Navigation */}
-                    <nav className="hidden md:flex space-x-8">
+                    <nav className="hidden md:flex items-center space-x-8">
                         {navLinks.map((item, index) => (
                             <Link
                                 key={index}
@@ -44,6 +67,73 @@ const Navbar = () => {
                             </Link>
                         ))}
                     </nav>
+
+                    {/* Desktop Profile Section */}
+                    {user ? (<div className="hidden md:flex items-center  space-x-4">
+                        {/* Profile Image */}
+                        <div className="relative">
+                            <button
+                                onClick={toggleProfile}
+                                className="flex items-center space-x-2 focus:outline-none"
+                            >
+                                <div className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-indigo-500/20 hover:border-indigo-500/40 transition-all">
+                                    <Image
+                                        src={user?.profileImageUrl || profileImage}
+                                        alt="Profile"
+                                        width={40}
+                                        height={40}
+                                        className="object-cover"
+                                        sizes="40px"
+                                    />
+                                </div>
+                                <ChevronDown className={`w-4 h-4 text-indigo-300 transition-transform ${isProfileOpen ? 'rotate-180' : ''}`} />
+                            </button>
+
+                            {/* Profile Dropdown */}
+                            {isProfileOpen && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: 10 }}
+                                    className="absolute right-0 mt-2 w-48 bg-gray-900/95 backdrop-blur-sm border border-indigo-500/20 rounded-xl shadow-lg py-2"
+                                >
+                                    <Link
+                                        href="/profile"
+                                        className="flex items-center px-4 py-2 text-sm text-indigo-300 hover:bg-indigo-900/30 hover:text-white transition-colors"
+                                    >
+                                        <User className="w-4 h-4 mr-2" />
+                                        Profile
+                                    </Link>
+                                    <Link
+                                        href="/settings"
+                                        className="flex items-center px-4 py-2 text-sm text-indigo-300 hover:bg-indigo-900/30 hover:text-white transition-colors"
+                                    >
+                                        <Settings className="w-4 h-4 mr-2" />
+                                        Settings
+                                    </Link>
+                                    <div className="border-t border-indigo-500/20 my-1" />
+                                    <button onClick={handleLogout}
+                                        className="flex items-center w-full px-4 py-2 text-sm text-red-400 hover:bg-red-900/30 hover:text-red-300 transition-colors"
+                                    >
+                                        <LogOut className="w-4 h-4 mr-2" />
+                                        Logout
+                                    </button>
+                                </motion.div>
+                            )}
+                        </div>
+                    </div>) : (<div className="hidden md:flex items-center space-x-8">
+                        <Link
+                            href={LOGIN_ROUTE}
+                            className={`
+                          inline-block px-4 py-2 rounded-xl text-sm font-medium font-Poppins transition-colors duration-200
+                           ${pathname === LOGIN_ROUTE
+                                    ? 'bg-purple-600 text-white border border-purple-700'
+                                    : 'bg-indigo-500 text-white hover:bg-indigo-600'}
+                               `}
+                        >
+                            Login
+                        </Link></div>)}
+
 
                     {/* Mobile menu button */}
                     <div className="md:hidden">
@@ -64,6 +154,7 @@ const Navbar = () => {
                             )}
                         </button>
                     </div>
+
                 </div>
             </div>
 
@@ -78,6 +169,65 @@ const Navbar = () => {
                 transition={{ duration: 0.3 }}
             >
                 <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-gray-900/95 border-t border-indigo-500/10 shadow-lg">
+                    {/* Mobile Profile Section */}
+                    {user && (<div className="px-3 py-2 mb-2">
+                        <button
+                            onClick={toggleProfile}
+                            className="flex items-center space-x-3 w-full focus:outline-none"
+                        >
+                            <div className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-indigo-500/20 hover:border-indigo-500/40 transition-all">
+                                <Image
+                                    src={user?.profileImageUrl || profileImage}
+                                    alt="Profile"
+                                    width={40}
+                                    height={40}
+                                    className="object-cover"
+                                    sizes="40px"
+                                />
+                            </div>
+                            <div className="flex-1 text-left">
+                                <p className="text-white font-Nunito-SemiBold">John Doe</p>
+                                <p className="text-indigo-300 text-sm">View Profile</p>
+                            </div>
+                            <ChevronDown className={`w-5 h-5 text-indigo-300 transition-transform ${isProfileOpen ? 'rotate-180' : ''}`} />
+                        </button>
+
+                        {/* Mobile Profile Dropdown */}
+                        {isProfileOpen && (
+                            <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className="mt-2 space-y-1"
+                            >
+                                <Link
+                                    href="/profile"
+                                    className="flex items-center px-3 py-2 text-sm text-indigo-300 hover:bg-indigo-900/30 hover:text-white transition-colors rounded-md"
+                                >
+                                    <User className="w-4 h-4 mr-2" />
+                                    Profile
+                                </Link>
+                                <Link
+                                    href="/settings"
+                                    className="flex items-center px-3 py-2 text-sm text-indigo-300 hover:bg-indigo-900/30 hover:text-white transition-colors rounded-md"
+                                >
+                                    <Settings className="w-4 h-4 mr-2" />
+                                    Settings
+                                </Link>
+                                <button onClick={handleLogout}
+                                    className="flex items-center w-full px-3 py-2 text-sm text-red-400 hover:bg-red-900/30 hover:text-red-300 transition-colors rounded-md"
+                                >
+                                    <LogOut className="w-4 h-4 mr-2" />
+                                    Logout
+                                </button>
+                            </motion.div>
+                        )}
+                    </div>)}
+
+
+                    <div className="border-t border-indigo-500/20 my-2" />
+
+                    {/* Navigation Links */}
                     {navLinks.map((item, index) => (
                         <Link
                             key={index}
@@ -93,6 +243,19 @@ const Navbar = () => {
                             {item.label}
                         </Link>
                     ))}
+                    {!user && (<Link
+
+                        href={LOGIN_ROUTE}
+                        className={`
+                                block px-3 py-2 rounded-md text-base font-Poppins transition-all
+                                ${pathname === LOGIN_ROUTE
+                                ? 'bg-indigo-900/70 text-purple-400'
+                                : 'text-indigo-300 hover:bg-indigo-900/40 hover:text-white'}
+                            `}
+                        onClick={() => setIsMenuOpen(false)}
+                    >
+                        Login
+                    </Link>)}
                 </div>
             </motion.div>
         </header>
