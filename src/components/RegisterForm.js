@@ -9,7 +9,7 @@ import { useForm } from "react-hook-form"
 import { useRouter } from "next/navigation"
 import { HOME_ROUTE } from "@/routes"
 import toast from "react-hot-toast"
-import Spinner from "./spinner"
+import Spinner from '@/components/Spinner'
 import { useDispatch, useSelector } from "react-redux"
 import { userRegister } from "@/redux/auth/authAction"
 

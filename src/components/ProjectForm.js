@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import { useForm } from 'react-hook-form'
 import { createProject, updateProject } from '@/api/project'
 import toast from 'react-hot-toast'
-import Spinner from './spinner'
+import Spinner from '@/components/Spinner'
 import { PROJECT_ROUTE } from '@/routes'
 import { useRouter } from 'next/navigation'
 

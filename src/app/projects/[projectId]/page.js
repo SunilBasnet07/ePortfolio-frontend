@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { getProjectById } from '@/api/project'
 import ProjectFullDetails from '@/components/ProjectDetails'
 import { useParams } from 'next/navigation'
-import Spinner from '@/components/spinner'
+import Spinner from '@/components/Spinner'
 
 const ProjectDetails = () => {
   const [project, setProject] = useState(null)

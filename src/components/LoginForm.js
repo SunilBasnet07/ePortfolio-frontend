@@ -8,7 +8,7 @@ import { useForm } from "react-hook-form"
 import toast from 'react-hot-toast';
 import { useRouter } from "next/navigation"
 import { FORGOT_PASSWORD_ROUTE, HOME_ROUTE } from "@/routes"
-import Spinner from "./spinner"
+import Spinner from '@/components/Spinner'
 import { useDispatch, useSelector } from "react-redux"
 import { userLogin } from "@/redux/auth/authAction"
 

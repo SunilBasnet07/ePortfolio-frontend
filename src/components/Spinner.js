@@ -1,25 +1,22 @@
+'use client'
 import React from 'react'
-import { motion } from 'framer-motion'
 
-const Spinner = ({ size = '40px', color = '#3B82F6' }) => {
+const Spinner = ({ size = 'md' }) => {
+  const sizeClasses = {
+    sm: 'w-4 h-4',
+    md: 'w-8 h-8',
+    lg: 'w-12 h-12'
+  }
+
   return (
     <div className="flex justify-center items-center">
-      <motion.div
-        style={{
-          width: size,
-          height: size,
-          borderRadius: '50%',
-          border: `4px solid rgba(0, 0, 0, 0.1)`,
-          borderTopColor: color,
-          display: 'inline-block',
-        }}
-        animate={{ rotate: 360 }}
-        transition={{
-          duration: 1,
-          ease: 'linear',
-          repeat: Infinity,
-        }}
-      />
+      <div
+        className={`${sizeClasses[size]} border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin`}
+        role="status"
+        aria-label="loading"
+      >
+        <span className="sr-only">Loading...</span>
+      </div>
     </div>
   )
 }
