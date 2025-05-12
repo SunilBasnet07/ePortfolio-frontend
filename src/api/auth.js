@@ -1,6 +1,8 @@
 import { baseApiUrl } from "@/config/apiUrl"
-import axios from "axios"
+
 import { authToken } from "./token";
+import axios from "axios";
+
 
 const login = async ({email,password}) => {
     const response = await axios.post(`${baseApiUrl}/api/auth/login`,{email,password})
@@ -32,11 +34,29 @@ const forgotPassword =async(data)=>{
    })
    return response.data;
 }
-const resetPassword =async(userId,token,data)=>{
-   console.log(userId,token,data);
-   const response = await axios.put(`${baseApiUrl}/api/auth/reset-password/${userId}?token=${token}`,data,{
-     
-   })
-   return response.data;
-}
+const resetPassword = async (userId, token, newPassword) => {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/reset-password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        userId,
+        token,
+        newPassword,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to reset password');
+    }
+
+    return data;
+  } catch (error) {
+    throw new Error(error.message || 'Failed to reset password. Please try again.');
+  }
+};
 export { login ,signUp,updateUser,forgotPassword,resetPassword}
